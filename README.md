@@ -112,12 +112,12 @@ The `getInstance()` method accepts the following params:
 ### Passing a value
 
 ```java
-bk.put(key, value);
+hm.put(key, value);
 ```
 **NOTE:** For data to be sent, if using Hexagon Data's SettingsActivity to show the opt-in screen, user should have the 'Allow Hexagon Data to receive my data' setting checked. This setting can also be set/unset programmatically using the following method. Setting it to true allows collection and sending of data, whereas if it's false, there's no collection or sending of data.
 
 ```java
-bk.setOptInPreference(true);
+hm.setOptInPreference(true);
 ```
 
 ### Passing multiple values
@@ -126,7 +126,7 @@ Create a `Map<String, String>` and populate the map with key and
 values. Pass the map to Hexagon Data using
 
 ```java
-bk.putAll(map);
+hm.putAll(map);
 ```
 
 ### Resuming data post
@@ -141,7 +141,7 @@ call the `resume()` method as follows
 @Override
 protected void onResume() {
    super.onResume();
-   bk.resume();
+   hm.resume();
 }
 ```
 

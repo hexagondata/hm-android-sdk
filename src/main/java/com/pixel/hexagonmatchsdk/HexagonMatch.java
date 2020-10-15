@@ -56,18 +56,21 @@ import android.os.Build;
  */
 public class HexagonMatch {
     public static final String LOG_TAG = "Hexagon Match Pixel";
-
-
     private static final String HL_SUBDOMAIN = "hexagondata.com";
     private static final String DEFAULT_DOMAIN = "locate.";
     private static final String DEFAULT_PIXEL = "/pixel.png";
     private static int CONNECTION_TIMEOUT = 5 * 1000;//5 seconds
     private static String PROTOCOL_SSL = "https://";
-
-    final private Map<String, String> headerParams = new HashMap<>();
     private Context context;
-    private int clientId = -1;
-
+    private int clientId = 1;
+    private String PlatformId;
+    private String TagId;
+    private String ModelDevice;
+    private String ManufacturerDevice;
+    private String BrandDevice;
+    private String BoardDevice;
+    private String Device;
+    private CharSequence NameApp;
     protected static boolean debug = false;
 
 
@@ -106,50 +109,31 @@ public class HexagonMatch {
      *
      * @param ctx
      * @param clientId
-     * @param keyString
-     * @param keyType
      * @param tagId
      * @param platformId
      */
-    public HexagonMatch(Context ctx, int clientId,String keyString, String keyType, String tagId, String platformId) {
-        init(ctx, clientId, keyString, keyType, tagId, platformId);
+    public HexagonMatch(Context ctx, int clientId, String tagId, String platformId) {
+        init(ctx, clientId, tagId, platformId);
     }
 
 
-
-    private void init(Context ctx, int clientId, final String keyString, final String keyType, String tagId, String platformId) {
+    private void init(Context ctx, int clientId, String tagId, String platformId) {
         setInitialized(false);
         enableDebug(false);
         this.setContext(ctx);
         this.clientId = clientId;
+
+
         final Resources appR = ctx.getResources();
-        final CharSequence NameApp = "&app=" + appR.getText(appR.getIdentifier("app_name",
+        this.NameApp = "&app=" + appR.getText(appR.getIdentifier("app_name",
                 "string", ctx.getPackageName()));
-
-        String keyTypeString = "";
-
-        switch (keyType)
-        {
-            case "email":
-                keyTypeString = "&e=";
-                break;
-            case "mobile":
-                keyTypeString = "&mo=";
-                break;
-            case "customer":
-                keyTypeString = "&cu=";
-                break;
-        }
-
-        final String PlatformId  = "&platform_id=" + platformId;
-        final String TagId  = "&tag_id=" + tagId;
-        final String ModelDevice = "&ml=" + Build.MODEL;
-        final String ManufacturerDevice = "&mf=" + Build.MANUFACTURER;
-        final String BrandDevice = "&bra=" + Build.BRAND;
-        final String BoardDevice = "&br=" + Build.BOARD;
-        final String Device = "&d=" + Build.DEVICE;
-        final String key256 = String.format("%s%s", keyTypeString, Utils.sha256(keyString));
-
+        this.PlatformId  = "&platform_id=" + platformId;
+        this.TagId  = "&tag_id=" + tagId;
+        this.ModelDevice = "&ml=" + Build.MODEL;
+        this.ManufacturerDevice = "&mf=" + Build.MANUFACTURER;
+        this.BrandDevice = "&bra=" + Build.BRAND;
+        this.BoardDevice = "&br=" + Build.BOARD;
+        this.Device = "&d=" + Build.DEVICE;
 
         if (HexagonMatch.debug) Log.d(HexagonMatch.LOG_TAG, "Setting up");
 
@@ -157,8 +141,6 @@ public class HexagonMatch {
         Runnable runnable = new Runnable() {
 
             public void run() {
-
-
                 setGoogleAdvertiserIdAvailable(false);
                 setLimitedAdTrackingEnabled(false);
                 String id = Utils.getUuid(contextFinal);
@@ -188,20 +170,7 @@ public class HexagonMatch {
                 } finally {
 
                     setIdAndType(id, idType);
-
-
-                    String urlMatch = PROTOCOL_SSL + DEFAULT_DOMAIN + HL_SUBDOMAIN +DEFAULT_PIXEL + "?mid=" + getId() + "&type=" + getIdType()  + PlatformId + TagId + key256 + NameApp + Device + BoardDevice + BrandDevice  + ModelDevice + ManufacturerDevice;
-
-
-                    try {
-                        sendRequest(urlMatch);
-                    } catch (Exception e) {
-                        if (HexagonMatch.debug)
-                            Log.e(HexagonMatch.LOG_TAG, "Error Sending sendRequest", e);
-                    }
-
                     startSession();
-
                     setInitialized(true);
                 }
             }
@@ -267,24 +236,28 @@ public class HexagonMatch {
 
 
 
+
     /**
-     * Send a HTTPs request.
+     * Send the value of key and type by https.
      */
-    public void sendRequest(String urlPattern) throws Exception {
+    public void sendData(String keyString, String keyType) throws Exception {
 
-        if (isLimitedAdTrackingEnabled()) return;
-
+        if (isLimitedAdTrackingEnabled() || !isInitialized()) {
+            return;
+        }
 
         if(!getId().isEmpty() && !getIdType().toString().isEmpty()) {
 
-            String newUrlPattern = urlPattern;
+            final String key256 = String.format("%s%s", Utils.getKeyType(keyType), Utils.sha256(keyString));
+            String urlMatch = PROTOCOL_SSL + DEFAULT_DOMAIN + HL_SUBDOMAIN +DEFAULT_PIXEL + "?mid=" + getId() + "&type=" + getIdType()  + getPlatformId() + getTagId() + key256 + getNameApp() + getDevice() + getBoardDevice() + getBrandDevice()  + getModelDevice() + getManufacturerDevice();
+            Log.i(HexagonMatch.LOG_TAG, urlMatch);
 
             try {
 
                 final Map<String, String> newUrlPatternParameters = new HashMap<>();
 
                 SendOverHTTPS sender = new SendOverHTTPS(newUrlPatternParameters, CONNECTION_TIMEOUT);
-                sender.execute(newUrlPattern);
+                sender.execute(urlMatch);
 
             } catch (Exception e) {
                 if (HexagonMatch.debug)
@@ -306,6 +279,49 @@ public class HexagonMatch {
         return clientId;
     }
 
+    public String getTagId() {
+        return TagId;
+    }
+
+    public String getPlatformId() {
+        return PlatformId;
+    }
+
+    public String getDevice() {
+        return Device;
+    }
+
+    public String getBoardDevice() {
+        return BoardDevice;
+    }
+
+    public String getBrandDevice() {
+        return BrandDevice;
+    }
+
+    public String getManufacturerDevice() {
+        return ManufacturerDevice;
+    }
+
+    public String getModelDevice() {
+        return ModelDevice;
+    }
+
+    public CharSequence getNameApp() {
+        return  NameApp;
+    }
+
+    /**
+     * Indicates whether the HexagonMatch instance has completed it's
+     * initialization and whether it is ready to send and extract data.
+     *
+     * Until isInitialized() returns true, no data can't send.
+     *
+     * @return - true indicates the instance is completely initialized.
+     */
+    public boolean isInitialized() {
+        return initialized;
+    }
 
     private void setInitialized(boolean initialized) {
         this.initialized = initialized;

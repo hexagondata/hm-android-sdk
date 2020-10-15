@@ -106,4 +106,22 @@ public class Utils {
         }
         return result;
     }
+
+    public static String getKeyType(String key) {
+        String keyTypeString = "";
+        switch (key)
+        {
+            case "email":
+                keyTypeString = "&e=";
+                break;
+            case "mobile":
+                keyTypeString = "&mo=";
+                break;
+            case "customer":
+                keyTypeString = "&cu=";
+                break;
+        }
+
+        return keyTypeString;
+    }
 }
