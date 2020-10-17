@@ -23,6 +23,20 @@ these permissions in `AndroidManifest.xml`.
 <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
+The library need to put your App ID inside the AndroidManifest.
+For more information please see https://googlemobileadssdk.page.link/admob-android-update-manifest
+
+```xml
+<manifest>
+    <application>
+        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
+    </application>
+</manifest>
+```
+
 
 ### Obfuscating
 
@@ -75,8 +89,7 @@ pcHttps.sendData(hm_keyValue, hm_keyType);
 ```
 
 ### Complete Example
-```
-
+```java
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;

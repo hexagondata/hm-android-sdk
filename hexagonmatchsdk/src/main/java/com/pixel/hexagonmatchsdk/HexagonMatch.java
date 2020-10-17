@@ -5,7 +5,10 @@ import android.util.Log;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient.Info;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import android.os.Build;
@@ -123,7 +126,6 @@ public class HexagonMatch {
         this.setContext(ctx);
         this.clientId = clientId;
 
-
         final Resources appR = ctx.getResources();
         this.NameApp = "&app=" + appR.getText(appR.getIdentifier("app_name",
                 "string", ctx.getPackageName()));
@@ -147,7 +149,17 @@ public class HexagonMatch {
                 IdType idType = IdType.SHA1;
                 try {
                     Info adInfo = null;
-                    adInfo = AdvertisingIdClient.getAdvertisingIdInfo(contextFinal);
+                    try {
+                        adInfo = AdvertisingIdClient.getAdvertisingIdInfo(contextFinal);
+                    } catch (GooglePlayServicesNotAvailableException e) {
+                        Log.e(HexagonMatch.LOG_TAG, e.getMessage());
+                    } catch (GooglePlayServicesRepairableException e) {
+                        Log.e(HexagonMatch.LOG_TAG,  e.getMessage());
+                    } catch (IOException e) {
+                        Log.e(HexagonMatch.LOG_TAG,  e.getMessage());
+                    }
+
+
                     if (adInfo != null) {
                         if (HexagonMatch.debug)
                             Log.d(HexagonMatch.LOG_TAG, "access to the Google Play");
@@ -250,7 +262,6 @@ public class HexagonMatch {
 
             final String key256 = String.format("%s%s", Utils.getKeyType(keyType), Utils.sha256(keyString));
             String urlMatch = PROTOCOL_SSL + DEFAULT_DOMAIN + HL_SUBDOMAIN +DEFAULT_PIXEL + "?mid=" + getId() + "&type=" + getIdType()  + getPlatformId() + getTagId() + key256 + getNameApp() + getDevice() + getBoardDevice() + getBrandDevice()  + getModelDevice() + getManufacturerDevice();
-            Log.i(HexagonMatch.LOG_TAG, urlMatch);
 
             try {
 
