@@ -8,7 +8,7 @@ This project contains Hexagon Match Platform Android SDK to be provided to clien
 Add the library as a dependency in gradle, it is in jcenter and maven central:
 
 ```
-compile 'com.pixel.hexagonmatchsdk.HexagonMatch:hexagonmatchsdk:1.0.0' (Waiting to approved by jcenter)
+compile 'com.pixel.hexagonmatchsdk.HexagonMatch:hexagonmatchsdk:1.0.0'
 ```
 
 Alternatively...
